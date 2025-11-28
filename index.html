@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestão de Frotas - Completo</title>
+    <!-- Inclui a biblioteca Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Link para o CSS externo -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>🚗 Sistema de Gestão de Frotas - Completo</h1>
         
+        <!-- Dashboard Resumido -->
         <div id="dashboard">
             <div class="loading">Carregando dashboard</div>
         </div>
 
+        <!-- Conteúdo por Abas -->
         <div class="tab-container">
             <div class="tab-buttons">
                 <button class="tab-button active" onclick="openTab(event, 'tab-gastos')">📝 Gastos</button>
@@ -23,6 +27,7 @@
                 <button class="tab-button" onclick="openTab(event, 'tab-analise')">📊 Análise</button>
             </div>
             
+            <!-- Tab 1: Gastos (Registro) -->
             <div id="tab-gastos" class="tab-content active">
                 <form id="registro-gasto-form">
                     <fieldset>
@@ -34,9 +39,9 @@
                                 <label for="veiculo">Veículo:</label>
                                 <select id="veiculo" name="veiculo" required>
                                     <option value="">Selecione o veículo</option>
-                                    <option value="Carro A">Carro A (Sedan)</option>
+                                    <option value="Carro A">Carro A (Moto)</option>
                                     <option value="Carro B">Carro B (Caminhonete)</option>
-                                    <option value="Carro C">Carro C (SUV)</option>
+                                    <option value="Carro C">Carro C (Caminhão)</option>
                                     <option value="Carro D">Carro D (Hatch)</option>
                                 </select>
                             </div>
@@ -98,10 +103,14 @@
                 </form>
             </div>
             
+            <!-- Tab 2: Diárias (Registro e Lista) -->
             <div id="tab-diarias" class="tab-content">
                 <form id="registro-diaria-form">
                     <fieldset>
                         <legend>💰 Registrar Diária</legend>
+                        
+                        <!-- NOVO: Campo oculto para armazenar o ID ao editar -->
+                        <input type="hidden" id="diaria-id-edicao" value=""> 
                         
                         <div class="flex-row">
                             <div>
@@ -136,7 +145,10 @@
                         <label for="diaria_observacoes">Observações:</label>
                         <textarea id="diaria_observacoes" name="observacoes" rows="2" placeholder="Motivo da diária..."></textarea>
                         
-                        <button type="submit" class="success">💰 Registrar Diária</button>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" id="btn-submit-diaria" class="success">💰 Registrar Diária</button>
+                            <button type="button" onclick="limparFormDiaria()" class="secondary">🔄 Limpar</button>
+                        </div>
                     </fieldset>
                 </form>
                 
@@ -144,10 +156,28 @@
                     <h3>📋 Diárias Registradas</h3>
                     <div id="lista-diarias">
                         <div class="loading">Carregando diárias</div>
+                        <!-- Tabela para Diárias: Ações foi incluída para botões Editar/Excluir -->
+                        <table id="tabela-diarias">
+                            <thead>
+                                <tr>
+                                    <th>Motorista</th>
+                                    <th>Período</th>
+                                    <th>Dias</th>
+                                    <th>Valor Diária</th>
+                                    <th>Valor Total</th>
+                                    <th>Observações</th>
+                                    <th>Ações</th> 
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Conteúdo inserido via JavaScript -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
             
+            <!-- Tab 3: Serviços (Lista de Manutenções com Garantia) -->
             <div id="tab-servicos" class="tab-content">
                 <div class="alert alert-info">
                     <strong>🔧 Serviços de Manutenção</strong> - Lista todos os serviços com status de garantia
@@ -158,6 +188,7 @@
                 </div>
             </div>
             
+            <!-- Tab 4: Análise (Gráficos e Filtros) -->
             <div id="tab-analise" class="tab-content">
                 <div id="painel-filtros">
                     <select id="filtro-veiculo">
@@ -211,6 +242,7 @@
         </div>
     </div>
 
+    <!-- Link para o JavaScript externo -->
     <script src="script.js"></script>
 </body>
 </html>

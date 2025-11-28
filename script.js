@@ -126,7 +126,7 @@ async function carregarDashboard() {
     }
 }
 
-// ===== GERENCIAMENTO DE GASTOS =====
+// ===== GERENCIAMENTO DE GASTOS (Manutenção do código existente) =====
 elements.forms.gasto.addEventListener('submit', async (e) => {
     e.preventDefault();
     await registrarGasto();
@@ -194,9 +194,6 @@ async function editarGasto(id) {
                 document.querySelector('#tab-gastos legend').textContent = `✏️ Editando Gasto ID ${id}`;
                 
                 // Muda para a tab de gastos
-                // NOTA: É necessário passar o event como argumento, ajustei a chamada no HTML
-                // Para não quebrar aqui, chamo a função de forma simples e confio na lógica de estado da tab
-                // openTab('tab-gastos');
                 document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
                 document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
                 document.getElementById('tab-gastos').classList.add('active');
@@ -234,7 +231,7 @@ async function excluirGasto(id) {
     }
 }
 
-// ===== GERENCIAMENTO DE SERVIÇOS =====
+// ===== GERENCIAMENTO DE SERVIÇOS (Manutenção do código existente) =====
 async function carregarServicos() {
     try {
         console.log('📡 Carregando serviços...');
@@ -315,7 +312,8 @@ function renderizarServicos(servicos, resumo) {
     elements.servicosLista.innerHTML = html;
 }
 
-// ===== GERENCIAMENTO DE DIÁRIAS =====
+// ===== GERENCIAMENTO DE DIÁRIAS (Correções e CRUD) =====
+
 elements.forms.diaria.addEventListener('submit', async (e) => {
     e.preventDefault();
     await registrarDiaria();
@@ -332,7 +330,6 @@ function calcularDiaria() {
     const valorDiaria = parseFloat(document.getElementById('valor_diaria_unitaria').value) || 0;
 
     if (inicio && fim) {
-        // Correção de bug no cálculo de dias: Data Fim - Data Início + 1
         const diffTime = Math.abs(new Date(fim) - new Date(inicio));
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
         const dias = Math.max(1, diffDays);
@@ -346,7 +343,20 @@ function calcularDiaria() {
     }
 }
 
+// Função de Limpar (para Edição)
+function limparFormDiaria() {
+    elements.forms.diaria.reset();
+    document.getElementById('diaria-id-edicao').value = '';
+    document.getElementById('btn-submit-diaria').textContent = '💰 Registrar Diária';
+    document.querySelector('#tab-diarias legend').textContent = '💰 Registrar Diária';
+    calcularDiaria(); // Limpa campos calculados
+}
+
+// Função de Registro/Edição
 async function registrarDiaria() {
+    const diariaIdEdicao = document.getElementById('diaria-id-edicao').value; 
+    const isEditing = diariaIdEdicao !== '';
+    
     const formData = new FormData(elements.forms.diaria);
     const diaria = Object.fromEntries(formData);
     
@@ -355,33 +365,58 @@ async function registrarDiaria() {
     diaria.valor_total = document.getElementById('valor_total_calculado').value.replace('R$ ', '').replace(',', '.');
 
     try {
-        const response = await fetch(`${API_BASE}/diarias`, {
-            method: 'POST',
+        const url = isEditing ? `${API_BASE}/diarias/${diariaIdEdicao}` : `${API_BASE}/diarias`;
+        const method = isEditing ? 'PUT' : 'POST';
+        
+        const response = await fetch(url, {
+            method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(diaria)
         });
         
+        // CORREÇÃO: Verifica se a resposta é OK antes de tentar ler JSON
+        if (!response.ok) {
+            // Se a resposta não for OK, tenta ler a mensagem de erro do servidor
+            // Caso falhe, lança um erro genérico
+            let errorData;
+            try {
+                errorData = await response.json();
+            } catch {
+                throw new Error(`Erro HTTP ${response.status}: Rota não encontrada ou erro no servidor.`);
+            }
+            throw new Error(errorData.mensagem || `Erro no servidor (Status ${response.status})`);
+        }
+
         const result = await response.json();
         
         if (result.status === 'sucesso') {
             showAlert('success', result.mensagem);
-            elements.forms.diaria.reset();
-            document.getElementById('dias_calculados').value = '';
-            document.getElementById('valor_total_calculado').value = '';
+            limparFormDiaria();
             carregarDiarias();
             carregarDashboard();
         } else {
             showAlert('error', result.mensagem);
         }
     } catch (error) {
-        showAlert('error', `Erro ao registrar diária: ${error.message}`);
+        showAlert('error', `Erro ao ${isEditing ? 'editar' : 'registrar'} diária: ${error.message}`);
     }
 }
 
+// Função de Carregamento
 async function carregarDiarias() {
     try {
+        // Esconde tabela e mostra loading
+        const tabela = document.getElementById('tabela-diarias');
+        if (tabela) tabela.style.display = 'none';
+        const loading = document.querySelector('#lista-diarias .loading');
+        if (loading) loading.style.display = 'block';
+
         const response = await fetch(`${API_BASE}/diarias`);
         const data = await response.json();
+        
+        // Esconde loading e mostra tabela
+        if (loading) loading.style.display = 'none';
+        if (tabela) tabela.style.display = 'table';
         
         if (data.status === 'sucesso') {
             renderizarDiarias(data.diarias);
@@ -389,33 +424,32 @@ async function carregarDiarias() {
             elements.diariasLista.innerHTML = `<div class="alert alert-error">${data.mensagem}</div>`;
         }
     } catch (error) {
+        const loading = document.querySelector('#lista-diarias .loading');
+        if (loading) loading.style.display = 'none';
         elements.diariasLista.innerHTML = `<div class="alert alert-error">Erro ao carregar diárias: ${error.message}</div>`;
     }
 }
 
+// Função de Renderização
 function renderizarDiarias(diarias) {
+    const tbody = document.querySelector('#tabela-diarias tbody');
+    if (!tbody) return; 
+
+    // Limpa o conteúdo anterior
+    tbody.innerHTML = '';
+    
     if (!diarias || diarias.length === 0) {
-        elements.diariasLista.innerHTML = '<div class="alert alert-info">Nenhuma diária registrada.</div>';
+        tbody.innerHTML = '<tr><td colspan="7"><div class="alert alert-info" style="margin: 0; border: none; background: transparent; text-align: center;">Nenhuma diária registrada.</div></td></tr>';
         return;
     }
 
-    let html = `
-        <div class="table-container">
-            <table id="tabela-diarias">
-                <thead>
-                    <tr>
-                        <th>Motorista</th>
-                        <th>Período</th>
-                        <th>Dias</th>
-                        <th>Valor Diária</th>
-                        <th>Valor Total</th>
-                        <th>Observações</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+    let linhas = '';
     
     diarias.forEach(diaria => {
-        html += `
+        // É essencial stringificar o objeto Diaria e substituir as aspas para evitar quebras no onclick
+        const diariaJson = JSON.stringify(diaria).replace(/"/g, "'"); 
+
+        linhas += `
             <tr>
                 <td>${diaria.motorista}</td>
                 <td>${formatarData(diaria.data_inicio)} a ${formatarData(diaria.data_fim)}</td>
@@ -423,14 +457,77 @@ function renderizarDiarias(diarias) {
                 <td>R$ ${parseFloat(diaria.valor_diaria_unitaria).toFixed(2)}</td>
                 <td>R$ ${parseFloat(diaria.valor_total).toFixed(2)}</td>
                 <td>${diaria.observacoes || '-'}</td>
+                <td>
+                    <button class="acoes-btn btn-editar" 
+                        onclick="prepararEdicaoDiaria(${diariaJson})">
+                        Editar
+                    </button>
+                    
+                </td>
             </tr>`;
     });
 
-    html += '</tbody></table></div>';
-    elements.diariasLista.innerHTML = html;
+    tbody.innerHTML = linhas;
 }
 
-// ===== ANÁLISE E GRÁFICOS (mantido o código original) =====
+// Função de Edição
+function prepararEdicaoDiaria(diaria) {
+    // Preenche o formulário de registro com os dados da diária
+    document.getElementById('diaria_motorista').value = diaria.motorista;
+    document.getElementById('data_inicio').value = diaria.data_inicio;
+    document.getElementById('data_fim').value = diaria.data_fim;
+    document.getElementById('valor_diaria_unitaria').value = diaria.valor_diaria_unitaria;
+    document.getElementById('diaria_observacoes').value = diaria.observacoes;
+
+    // Armazena o ID da diária que está sendo editada
+    document.getElementById('diaria-id-edicao').value = diaria.id;
+    
+    // Atualiza o texto do botão e a legenda
+    document.getElementById('btn-submit-diaria').textContent = '💾 Salvar Edição da Diária';
+    document.querySelector('#tab-diarias legend').textContent = `✏️ Editando Diária de ${diaria.motorista}`;
+    
+    // Recalcula e rola para o topo
+    calcularDiaria();
+    document.getElementById('tab-diarias').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Função de Exclusão
+async function excluirDiaria(id) {
+    if (confirm(`🗑️ Tem certeza que deseja excluir a diária ID ${id}?`)) {
+        try {
+            const response = await fetch(`${API_BASE}/diarias/${id}`, {
+                method: 'DELETE'
+            });
+            
+            // CORREÇÃO: Verifica se a resposta é OK antes de tentar ler JSON
+            if (!response.ok) {
+                 // Se a resposta não for OK, tenta ler a mensagem de erro do servidor
+                let errorData;
+                try {
+                    errorData = await response.json();
+                } catch {
+                    throw new Error(`Erro HTTP ${response.status}: Rota não encontrada ou erro no servidor.`);
+                }
+                throw new Error(errorData.mensagem || `Erro no servidor (Status ${response.status})`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.status === 'sucesso') {
+                showAlert('success', result.mensagem);
+                carregarDiarias();
+                carregarDashboard();
+            } else {
+                showAlert('error', result.mensagem || `Erro ao excluir diária ID ${id}.`);
+            }
+        } catch (error) {
+            showAlert('error', `Erro ao excluir diária: ${error.message}`);
+        }
+    }
+}
+
+
+// ===== ANÁLISE E GRÁFICOS (Manutenção do código existente) =====
 async function carregarAnalise() {
     // Coleta filtros
     const filtros = {
@@ -447,8 +544,6 @@ async function carregarAnalise() {
     try {
         // Envia a URL com os filtros para o backend
         const response = await fetch(`${API_BASE}/analise?${queryString}`);
-        
-        // ... (resto do tratamento da resposta)
         
         if (!response.ok) {
              throw new Error(`Erro HTTP: ${response.status}`);
@@ -791,6 +886,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('data_inicio').value = hoje;
     document.getElementById('data_fim').value = hoje;
     
+    // Configura o botão de limpar diária
+    document.querySelector('button[onclick="limparFormDiaria()"]').addEventListener('click', limparFormDiaria);
+
     // Carrega dados iniciais
     carregarDashboard();
     
@@ -800,40 +898,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Torna funções globais para os botões chamados no HTML
 window.editarGasto = editarGasto;
 window.excluirGasto = excluirGasto;
-// Ajuste para a função openTab, que agora precisa ser chamada com o evento
-window.openTab = function(event, tabName) {
-    // A função openTab original foi renomeada no escopo global para evitar conflitos
-    // e o event agora é passado do HTML como "openTab(event, 'tab-...')".
-    // Aqui fazemos uma chamada interna mais segura.
-    // É mais limpo ajustar o HTML de volta para `onclick="openTab('tab-...')"` e remover o `event`
-    // ou manter a chamada com `event` e usar a função ajustada `openTab(event, tabName)`.
-    // Vou reajustar a chamada do HTML para usar o novo padrão com 'event'.
-
-    // O código aqui reflete a mudança feita na seção 1 (HTML) para aceitar o evento.
-    
-    // Esconde todas as tabs
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Mostra a tab selecionada
-    document.getElementById(tabName).classList.add('active');
-    event.currentTarget.classList.add('active');
-    
-    // Carrega dados específicos da tab
-    if (tabName === 'tab-analise') {
-        console.log('📊 Abrindo aba análise...');
-        setTimeout(() => {
-            carregarAnalise();
-        }, 100);
-    } else if (tabName === 'tab-diarias') {
-        carregarDiarias();
-    } else if (tabName === 'tab-servicos') {
-        carregarServicos();
-    }
-};
-
+window.openTab = openTab;
 window.limparFormGasto = limparFormGasto;
+window.limparFormDiaria = limparFormDiaria; 
+window.prepararEdicaoDiaria = prepararEdicaoDiaria; 
+window.excluirDiaria = excluirDiaria;

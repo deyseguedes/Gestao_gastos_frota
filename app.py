@@ -55,8 +55,7 @@ def calcular_status_garantia(data_garantia):
         return 'Sem Data'
     try:
         garantia = datetime.strptime(data_garantia, '%Y-%m-%d')
-        # Zera hora para comparar apenas a data
-        hoje = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) 
+        hoje = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
         if garantia < hoje:
             return 'Vencida'
         else:
@@ -65,12 +64,8 @@ def calcular_status_garantia(data_garantia):
         return 'Data Inválida'
 
 def aplicar_filtros(gastos, filtros):
-    """
-    CORREÇÃO: Filtra a lista de gastos com base nos filtros da requisição (Veículo, Placa, etc.).
-    A lógica verifica se o filtro está preenchido ANTES de tentar comparar.
-    """
+    """Filtra a lista de gastos com base nos filtros da requisição (Veículo, Placa, etc.)."""
     
-    # Remove filtros com valor vazio para não processá-los
     filtros = {k: v for k, v in filtros.items() if v} 
 
     if not filtros:
@@ -78,27 +73,23 @@ def aplicar_filtros(gastos, filtros):
     
     gastos_filtrados = []
     
-    # Prepara o filtro de mês, garantindo o formato '01', '02', etc.
     mes_filtro = filtros.get('mes').zfill(2) if filtros.get('mes') else None
     
     for gasto in gastos:
-        # 1. Filtro por Veículo
+        
         if filtros.get('veiculo') and gasto.get('veiculo') != filtros['veiculo']: 
             continue
         
-        # 2. Filtro por Placa
         if filtros.get('placa') and gasto.get('placa') != filtros['placa']: 
             continue
             
-        # 3. Filtro por Motorista
         if filtros.get('motorista') and gasto.get('motorista') != filtros['motorista']: 
             continue
             
-        # 4. Filtro por Data (Ano e Mês)
         data_gasto = gasto.get('data', '')
         if data_gasto:
             ano = data_gasto[:4]
-            mes = data_gasto[5:7] # MM
+            mes = data_gasto[5:7] 
             
             if filtros.get('ano') and ano != filtros['ano']: 
                 continue
@@ -106,7 +97,6 @@ def aplicar_filtros(gastos, filtros):
             if mes_filtro and mes != mes_filtro: 
                 continue
         
-        # Se o gasto passou por todos os filtros ativos, adicione-o
         gastos_filtrados.append(gasto)
         
     return gastos_filtrados
@@ -130,7 +120,6 @@ def health_check():
         'message': 'Servidor funcionando!',
         'timestamp': datetime.now().isoformat()
     })
-# ... (Removida a rota /api/test, pois não é essencial)
 
 # ====================================
 # DASHBOARD
@@ -144,16 +133,10 @@ def dashboard():
         gastos = dados.get('gastos', [])
         diarias = dados.get('diarias', [])
         
-        # ... (Mantida a lógica de cálculo do dashboard) ...
-        
-        # Gastos do mês atual
         mes_atual = datetime.now().strftime('%Y-%m')
         gastos_mes = sum(float(g.get('valor', 0)) for g in gastos if g.get('data', '').startswith(mes_atual))
-        
-        # Diárias do mês atual
         diarias_mes = sum(float(d.get('valor_total', 0)) for d in diarias if d.get('data_inicio', '').startswith(mes_atual))
         
-        # Serviços com garantia vencida
         servicos_vencidos = 0
         servicos_sem_garantia = 0
         
@@ -167,11 +150,9 @@ def dashboard():
                 if not gasto.get('garantia_validade'):
                     servicos_sem_garantia += 1
         
-        # Entidades únicas
         placas_unicas = set(g.get('placa') for g in gastos if g.get('placa'))
         motoristas_unicos = set(g.get('motorista') for g in gastos if g.get('motorista'))
         
-        # Totais gerais
         total_gastos = sum(float(g.get('valor', 0)) for g in gastos)
         total_diarias = sum(float(d.get('valor_total', 0)) for d in diarias)
         
@@ -237,7 +218,7 @@ def listar_servicos():
         return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
 # ====================================
-# DIÁRIAS
+# DIÁRIAS (Com Edição e Exclusão)
 # ====================================
 
 @app.route('/api/diarias', methods=['GET'])
@@ -290,9 +271,73 @@ def registrar_diaria():
     except Exception as e:
         return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
+@app.route('/api/diarias/<id>', methods=['PUT']) # CORREÇÃO: Rota simplificada
+def atualizar_diaria(id):
+    """Atualiza diária existente"""
+    try:
+        dados = carregar_dados()
+        
+        diaria_index = next((i for i, d in enumerate(dados['diarias']) if d.get('id') == id), None)
+        
+        if diaria_index is None:
+            return jsonify({'status': 'erro', 'mensagem': 'Diária não encontrada'}), 404
+        
+        dados_atualizados = request.json
+        diaria_existente = dados['diarias'][diaria_index]
+        
+        # Recalcula dias e valor total se as datas ou valor unitário mudarem
+        data_inicio = dados_atualizados.get('data_inicio', diaria_existente.get('data_inicio'))
+        data_fim = dados_atualizados.get('data_fim', diaria_existente.get('data_fim'))
+        # Garante que o valor unitário é float, pois pode vir como string do JSON
+        valor_unitario = float(dados_atualizados.get('valor_diaria_unitaria', diaria_existente.get('valor_diaria_unitaria')))
+        
+        dias = calcular_dias_uteis(data_inicio, data_fim)
+        valor_total = round(dias * valor_unitario, 2)
+        
+        atualizacoes = {
+            'motorista': dados_atualizados.get('motorista', diaria_existente.get('motorista')),
+            'data_inicio': data_inicio,
+            'data_fim': data_fim,
+            'valor_diaria_unitaria': valor_unitario,
+            'observacoes': dados_atualizados.get('observacoes', diaria_existente.get('observacoes')),
+            'dias_uteis': dias,
+            'valor_total': valor_total,
+            'data_atualizacao': datetime.now().isoformat()
+        }
+        
+        # Atualiza a diária no JSON
+        dados['diarias'][diaria_index] = {**diaria_existente, **atualizacoes}
+        
+        salvar_dados(dados)
+        return jsonify({'status': 'sucesso', 'mensagem': 'Diária atualizada com sucesso!'})
+    except Exception as e:
+        print(f"Erro ao atualizar diária: {e}")
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+
+
+@app.route('/api/diarias/<id>', methods=['DELETE']) # CORREÇÃO: Rota simplificada
+def excluir_diaria(id):
+    """Exclui diária"""
+    print(f" tentativa de exclusão da diária ID: {id}") # Log de debug
+    try:
+        dados = carregar_dados()
+        tamanho_original = len(dados['diarias'])
+        dados['diarias'] = [d for d in dados['diarias'] if d.get('id') != id]
+        
+        if len(dados['diarias']) == tamanho_original:
+             # Isso só deve ocorrer se a diária não foi encontrada
+             return jsonify({'status': 'erro', 'mensagem': 'Diária não encontrada para exclusão'}), 404
+
+        salvar_dados(dados)
+        return jsonify({'status': 'sucesso', 'mensagem': 'Diária excluída com sucesso!'})
+    except Exception as e:
+        print(f"Erro ao excluir diária: {e}")
+        return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
+
 # ====================================
 # GASTOS (CRUD)
 # ====================================
+# ... (Manutenção das rotas de GASTOS) ...
 
 @app.route('/api/gastos', methods=['GET'])
 def listar_gastos():
@@ -370,10 +415,11 @@ def excluir_gasto(id):
     except Exception as e:
         return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
+
 # ====================================
 # ANÁLISE E FILTROS
 # ====================================
-
+# ... (Manutenção das rotas de ANÁLISE e FILTROS) ...
 @app.route('/api/analise', methods=['GET'])
 def analise_dados():
     """Calcula dados para gráficos aplicando filtros da URL."""
@@ -382,11 +428,9 @@ def analise_dados():
         gastos = dados.get('gastos', [])
         diarias = dados.get('diarias', [])
 
-        # 1. Aplica filtros DA REQUISIÇÃO na lista principal de gastos
         filtros = request.args.to_dict()
         gastos_filtrados = aplicar_filtros(gastos, filtros) 
 
-        # 2. Análise de Gastos (USANDO APENAS A LISTA FILTRADA)
         gastos_por_tipo = {}
         gastos_por_veiculo = {}
         gastos_por_placa = {}
@@ -408,7 +452,6 @@ def analise_dados():
                 mes_ano = gasto['data'][:7]
                 gastos_mensal[mes_ano] = gastos_mensal.get(mes_ano, 0) + valor
         
-        # 3. Análise de Diárias (usando lista completa, pois não há filtros de diárias)
         diarias_por_motorista = {}
         diarias_mensal = {}
         for diaria in diarias:
@@ -451,7 +494,6 @@ def obter_filtros():
         motoristas_gastos = sorted(list(set(g.get('motorista') for g in gastos if g.get('motorista'))))
         motoristas_diarias = sorted(list(set(d.get('motorista') for d in diarias if d.get('motorista'))))
         
-        # Anos disponíveis dos gastos
         anos = sorted(list(set(g['data'][:4] for g in gastos if g.get('data') and len(g['data']) >= 4)), reverse=True)
         
         return jsonify({
@@ -467,12 +509,12 @@ def obter_filtros():
     except Exception as e:
         return jsonify({'status': 'erro', 'mensagem': str(e)}), 500
 
+
 # ====================================
 # INICIALIZAÇÃO
 # ====================================
 
 if __name__ == '__main__':
-    # Inicializa com dados de exemplo se necessário
     if not os.path.exists(ARQUIVO_JSON):
         dados_iniciais = {
             'gastos': [
