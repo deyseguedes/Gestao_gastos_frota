@@ -1,0 +1,86 @@
+{
+  "gastos": [
+    {
+      "data": "2024-01-15",
+      "veiculo": "Carro A",
+      "placa": "ABC-1234",
+      "motorista": "João Silva",
+      "tipo_gasto": "Manutencao",
+      "valor": "350.5",
+      "nf_numero": "NF123456",
+      "os_numero": "OS789012",
+      "garantia_validade": "2026-01-01",
+      "observacoes": "Troca de óleo e filtros",
+      "id": 1,
+      "status_garantia": "Vigente",
+      "data_edicao": "2025-11-27T16:02:32.556534"
+    },
+    {
+      "veiculo": "Carro B",
+      "placa": "AAA-2222",
+      "data": "2025-11-27",
+      "motorista": "DEYSE",
+      "tipo_gasto": "Manutencao",
+      "valor": "50",
+      "nf_numero": "",
+      "os_numero": "",
+      "garantia_validade": "2025-11-28",
+      "observacoes": "",
+      "id": 2,
+      "data_registro": "2025-11-27T15:54:59.131971"
+    },
+    {
+      "veiculo": "Carro B",
+      "placa": "AAA-3333",
+      "data": "2025-11-27",
+      "motorista": "GILVAN",
+      "tipo_gasto": "Manutencao",
+      "valor": "500",
+      "nf_numero": "123456",
+      "os_numero": "OS253614",
+      "garantia_validade": "2025-12-27",
+      "observacoes": "SERVIÇO COM O AR",
+      "id": 3,
+      "data_registro": "2025-11-27T15:58:34.728677",
+      "status_garantia": "Vigente"
+    },
+    {
+      "veiculo": "Carro A",
+      "placa": "AAA-2222",
+      "data": "2025-11-27",
+      "motorista": "GILVAN",
+      "tipo_gasto": "Manutencao",
+      "valor": "500",
+      "nf_numero": "",
+      "os_numero": "",
+      "garantia_validade": "2025-11-29",
+      "observacoes": "",
+      "id": 4,
+      "data_registro": "2025-11-27T16:30:10.309015"
+    }
+  ],
+  "diarias": [
+    {
+      "motorista": "GILVAN",
+      "data_inicio": "2025-11-27",
+      "data_fim": "2025-11-28",
+      "valor_diaria_unitaria": "200",
+      "observacoes": "FRETE TAL",
+      "dias_uteis": 2,
+      "valor_total": 400.0,
+      "data_registro": "2025-11-27T15:59:24.351293",
+      "id": "20251127155924"
+    },
+    {
+      "motorista": "GUSTAVO",
+      "data_inicio": "2025-11-27",
+      "data_fim": "2025-11-27",
+      "valor_diaria_unitaria": "50",
+      "observacoes": "",
+      "dias_uteis": 1,
+      "valor_total": 50.0,
+      "data_registro": "2025-11-27T16:04:51.793196",
+      "id": "20251127160451"
+    }
+  ]
+}

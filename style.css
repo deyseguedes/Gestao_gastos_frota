@@ -1,0 +1,470 @@
+/* ==================================== */
+/* 1. VARIÁVEIS GLOBAIS / CORES */
+/* ==================================== */
+:root {
+    --primary: #007bff;
+    --secondary: #6c757d;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #17a2b8;
+    --light: #f8f9fa;
+    --dark: #343a40;
+}
+
+/* ==================================== */
+/* 2. LAYOUT BASE E ESTRUTURA */
+/* ==================================== */
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    padding: 20px; 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.container { 
+    max-width: 1400px; 
+    margin: auto; 
+    background: white; 
+    padding: 30px; 
+    border-radius: 15px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    backdrop-filter: blur(10px);
+}
+
+h1, h2, h3 { 
+    color: var(--primary); 
+    margin-bottom: 20px;
+}
+
+h1 { 
+    border-bottom: 3px solid var(--primary); 
+    padding-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ==================================== */
+/* 3. DASHBOARD CARDS */
+/* ==================================== */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-left: 4px solid var(--primary);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card h3 {
+    margin: 0 0 10px 0;
+    font-size: 0.9em;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.card .value {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--primary); /* Padrão */
+    margin: 0;
+}
+
+.card .description {
+    color: var(--secondary);
+    font-size: 0.9em;
+    margin: 5px 0 0 0;
+}
+
+/* Modificadores de Card */
+.card.alert {
+    border-left-color: var(--danger);
+    background: linear-gradient(135deg, #fff5f5, #fff);
+}
+.card.alert .value {
+    color: var(--danger);
+}
+
+.card.success {
+    border-left-color: var(--success);
+    background: linear-gradient(135deg, #f0fff4, #fff);
+}
+.card.success .value {
+    color: var(--success);
+}
+
+/* ==================================== */
+/* 4. FORMULÁRIOS E BOTÕES */
+/* ==================================== */
+fieldset { 
+    border: 2px solid #e9ecef; 
+    padding: 25px; 
+    border-radius: 10px; 
+    margin-bottom: 25px; 
+    background: var(--light);
+    transition: all 0.3s ease;
+}
+
+fieldset:hover {
+    border-color: var(--primary);
+}
+
+legend { 
+    font-weight: bold; 
+    color: var(--primary); 
+    padding: 0 15px;
+    font-size: 1.2em;
+}
+
+label { 
+    display: block; 
+    margin-top: 15px; 
+    font-weight: 600; 
+    color: var(--dark);
+}
+
+input, select, textarea {
+    width: 100%; 
+    padding: 12px; 
+    margin-top: 8px; 
+    margin-bottom: 15px;
+    border: 2px solid #e9ecef; 
+    border-radius: 8px; 
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+}
+
+button { 
+    background: linear-gradient(135deg, var(--primary), #0056b3);
+    color: white; 
+    border: none; 
+    padding: 12px 25px; 
+    cursor: pointer; 
+    border-radius: 8px; 
+    font-weight: bold; 
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+button:hover { 
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,123,255,0.3);
+}
+
+/* Modificadores de Botão */
+button.secondary {
+    background: linear-gradient(135deg, var(--secondary), #545b62);
+}
+
+button.success {
+    background: linear-gradient(135deg, var(--success), #1e7e34);
+}
+
+button.danger {
+    background: linear-gradient(135deg, var(--danger), #c82333);
+}
+
+.flex-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.flex-row > * {
+    flex: 1;
+}
+
+/* Ações em Tabela */
+.acoes-btn { 
+    padding: 6px 12px; 
+    margin-right: 5px; 
+    cursor: pointer; 
+    border-radius: 5px; 
+    border: none;
+    font-size: 0.8em;
+    transition: all 0.3s ease;
+}
+
+.btn-editar { 
+    background: var(--warning); 
+    color: var(--dark);
+}
+
+.btn-editar:hover {
+    background: #e0a800;
+}
+
+.btn-excluir { 
+    background: var(--danger); 
+    color: white;
+}
+
+.btn-excluir:hover {
+    background: #c82333;
+}
+
+/* ==================================== */
+/* 5. TABELAS E STATUS */
+/* ==================================== */
+.table-container {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+#tabela-servicos, #tabela-diarias { 
+    width: 100%; 
+    border-collapse: collapse; 
+    font-size: 0.9em; 
+}
+
+#tabela-servicos th, #tabela-servicos td,
+#tabela-diarias th, #tabela-diarias td { 
+    border-bottom: 1px solid #e9ecef; 
+    padding: 12px 15px; 
+    text-align: left; 
+}
+
+#tabela-servicos th, #tabela-diarias th { 
+    background: linear-gradient(135deg, var(--primary), #0056b3);
+    color: white;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+#tabela-servicos tr:hover, #tabela-diarias tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Status Tags */
+.status-vigente { 
+    color: var(--success); 
+    font-weight: bold; 
+    background: #f0fff4;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.status-vencida { 
+    color: var(--danger); 
+    font-weight: bold; 
+    background: #fff5f5;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.status-sem-data { 
+    color: var(--secondary); 
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* ==================================== */
+/* 6. ALERTAS */
+/* ==================================== */
+.alert { 
+    padding: 15px; 
+    border-radius: 8px; 
+    margin: 15px 0;
+    border-left: 4px solid;
+}
+
+.alert-error { 
+    background: #fff5f5; 
+    color: var(--danger);
+    border-left-color: var(--danger);
+}
+
+.alert-success { 
+    background: #f0fff4; 
+    color: var(--success);
+    border-left-color: var(--success);
+}
+
+.alert-info { 
+    background: #e3f2fd; 
+    color: var(--info);
+    border-left-color: var(--info);
+}
+
+.alert-warning { 
+    background: #fff3cd; 
+    color: #856404;
+    border-left-color: var(--warning);
+}
+
+/* ==================================== */
+/* 7. COMPONENTES DE NAVEGAÇÃO (TABS) */
+/* ==================================== */
+.tab-container {
+    margin: 25px 0;
+}
+
+.tab-buttons {
+    display: flex;
+    background: white;
+    border-radius: 10px 10px 0 0;
+    overflow: hidden;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px;
+    background: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.tab-button.active {
+    background: var(--primary);
+    color: white;
+}
+
+.tab-content {
+    display: none;
+    background: white;
+    padding: 25px;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ==================================== */
+/* 8. GRÁFICOS E FILTROS */
+/* ==================================== */
+.graficos { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
+    gap: 25px; 
+    margin-top: 30px; 
+}
+
+/* 🛠️ AJUSTE DE ALTURA PARA GRÁFICOS MENORES */
+.grafico-item { 
+    background: white; 
+    padding: 20px; 
+    border-radius: 10px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+    height: 350px; /* Altura reduzida para 350px */
+    position: relative; 
+}
+
+/* 🛠️ AJUSTE DE ALTURA PARA GRÁFICO DE LARGURA TOTAL */
+.grafico-item-full { 
+    grid-column: 1 / -1;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+    height: 450px; /* Altura reduzida para 450px */
+    position: relative;
+}
+
+/* Regra essencial para Chart.js funcionar dentro dos limites */
+.grafico-item canvas, .grafico-item-full canvas {
+    max-height: 100%; 
+    height: 100% !important;
+    width: 100% !important;
+}
+
+#painel-filtros { 
+    display: flex; 
+    gap: 12px; 
+    flex-wrap: wrap; 
+    align-items: flex-end;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    margin: 20px 0;
+}
+
+#painel-filtros select { 
+    width: auto; 
+    min-width: 160px; 
+    margin-bottom: 0;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    color: var(--secondary);
+}
+
+/* ==================================== */
+/* 9. ANIMAÇÕES E MEDIA QUERIES */
+/* ==================================== */
+
+/* Animação de Carregamento */
+.loading::after {
+    content: '...';
+    animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+    0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+    40% { color: var(--secondary); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+    60% { text-shadow: .25em 0 0 var(--secondary), .5em 0 0 rgba(0,0,0,0); }
+    80%, 100% { text-shadow: .25em 0 0 var(--secondary), .5em 0 0 var(--secondary); }
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .flex-row {
+        flex-direction: column;
+    }
+    
+    .graficos {
+        grid-template-columns: 1fr;
+    }
+    
+    #painel-filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #painel-filtros select {
+        width: 100%;
+    }
+    
+    /* Ajusta a altura dos gráficos em telas pequenas */
+    .grafico-item, .grafico-item-full {
+        height: 350px; 
+    }
+}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Frotas - Completo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🚗 Sistema de Gestão de Frotas - Completo</h1>
+        
+        <div id="dashboard">
+            <div class="loading">Carregando dashboard</div>
+        </div>
+
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="openTab(event, 'tab-gastos')">📝 Gastos</button>
+                <button class="tab-button" onclick="openTab(event, 'tab-diarias')">💰 Diárias</button>
+                <button class="tab-button" onclick="openTab(event, 'tab-servicos')">🔧 Serviços</button>
+                <button class="tab-button" onclick="openTab(event, 'tab-analise')">📊 Análise</button>
+            </div>
+            
+            <div id="tab-gastos" class="tab-content active">
+                <form id="registro-gasto-form">
+                    <fieldset>
+                        <legend>📝 Registrar Novo Gasto</legend>
+                        <input type="hidden" id="gasto-id-edicao" value="">
+                        
+                        <div class="flex-row">
+                            <div>
+                                <label for="veiculo">Veículo:</label>
+                                <select id="veiculo" name="veiculo" required>
+                                    <option value="">Selecione o veículo</option>
+                                    <option value="Carro A">Carro A (Sedan)</option>
+                                    <option value="Carro B">Carro B (Caminhonete)</option>
+                                    <option value="Carro C">Carro C (SUV)</option>
+                                    <option value="Carro D">Carro D (Hatch)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="placa">Placa:</label>
+                                <input type="text" id="placa" name="placa" required placeholder="ABC-1234">
+                            </div>
+                            <div>
+                                <label for="data">Data:</label>
+                                <input type="date" id="data" name="data" required>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-row">
+                            <div>
+                                <label for="motorista">Motorista:</label>
+                                <input type="text" id="motorista" name="motorista" required placeholder="Nome completo">
+                            </div>
+                            <div>
+                                <label for="tipo_gasto">Tipo de Gasto:</label>
+                                <select id="tipo_gasto" name="tipo_gasto" required>
+                                    <option value="">Selecione o tipo</option>
+                                    <option value="Combustivel">Combustível</option>
+                                    <option value="Manutencao">Manutenção/Reparo</option>
+                                    <option value="Imposto">Imposto/Taxa/Pedágio</option>
+                                    <option value="Outros">Outros</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="valor">Valor (R$):</label>
+                                <input type="number" id="valor" name="valor" step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                        </div>
+                        
+                        <h4>📄 Documentação (Opcional)</h4>
+                        <div class="flex-row">
+                            <div>
+                                <label for="nf_numero">Nº Nota Fiscal:</label>
+                                <input type="text" id="nf_numero" name="nf_numero" placeholder="Opcional">
+                            </div>
+                            <div>
+                                <label for="os_numero">Nº Ordem de Serviço:</label>
+                                <input type="text" id="os_numero" name="os_numero" placeholder="Apenas para manutenção">
+                            </div>
+                            <div>
+                                <label for="garantia_validade">Validade da Garantia:</label>
+                                <input type="date" id="garantia_validade" name="garantia_validade">
+                            </div>
+                        </div>
+                        
+                        <label for="observacoes">Observações:</label>
+                        <textarea id="observacoes" name="observacoes" rows="3" placeholder="Observações adicionais..."></textarea>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="submit" id="btn-submit-gasto" class="success">✅ Registrar Gasto</button>
+                            <button type="button" onclick="limparFormGasto()" class="secondary">🔄 Limpar</button>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+            
+            <div id="tab-diarias" class="tab-content">
+                <form id="registro-diaria-form">
+                    <fieldset>
+                        <legend>💰 Registrar Diária</legend>
+                        
+                        <div class="flex-row">
+                            <div>
+                                <label for="diaria_motorista">Motorista:</label>
+                                <input type="text" id="diaria_motorista" name="motorista" required placeholder="Nome do motorista">
+                            </div>
+                            <div>
+                                <label for="data_inicio">Data Início:</label>
+                                <input type="date" id="data_inicio" name="data_inicio" required>
+                            </div>
+                            <div>
+                                <label for="data_fim">Data Fim:</label>
+                                <input type="date" id="data_fim" name="data_fim" required>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-row">
+                            <div>
+                                <label for="valor_diaria_unitaria">Valor Diária (R$):</label>
+                                <input type="number" id="valor_diaria_unitaria" name="valor_diaria_unitaria" step="0.01" min="0" required placeholder="150.00">
+                            </div>
+                            <div>
+                                <label for="dias_calculados">Dias Calculados:</label>
+                                <input type="text" id="dias_calculados" readonly placeholder="Calculado automaticamente" style="background: #f8f9fa;">
+                            </div>
+                            <div>
+                                <label for="valor_total_calculado">Valor Total (R$):</label>
+                                <input type="text" id="valor_total_calculado" readonly placeholder="Calculado automaticamente" style="background: #f8f9fa;">
+                            </div>
+                        </div>
+                        
+                        <label for="diaria_observacoes">Observações:</label>
+                        <textarea id="diaria_observacoes" name="observacoes" rows="2" placeholder="Motivo da diária..."></textarea>
+                        
+                        <button type="submit" class="success">💰 Registrar Diária</button>
+                    </fieldset>
+                </form>
+                
+                <div class="table-container">
+                    <h3>📋 Diárias Registradas</h3>
+                    <div id="lista-diarias">
+                        <div class="loading">Carregando diárias</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="tab-servicos" class="tab-content">
+                <div class="alert alert-info">
+                    <strong>🔧 Serviços de Manutenção</strong> - Lista todos os serviços com status de garantia
+                </div>
+                
+                <div id="servicos-lista">
+                    <div class="loading">Carregando serviços</div>
+                </div>
+            </div>
+            
+            <div id="tab-analise" class="tab-content">
+                <div id="painel-filtros">
+                    <select id="filtro-veiculo">
+                        <option value="">Todos Veículos</option>
+                    </select>
+                    <select id="filtro-placa">
+                        <option value="">Todas Placas</option>
+                    </select>
+                    <select id="filtro-motorista">
+                        <option value="">Todos Motoristas</option>
+                    </select>
+                    <select id="filtro-ano">
+                        <option value="">Todos Anos</option>
+                    </select>
+                    <select id="filtro-mes">
+                        <option value="">Todos Meses</option>
+                        <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+                        <option value="3">Março</option><option value="4">Abril</option>
+                        <option value="5">Maio</option><option value="6">Junho</option>
+                        <option value="7">Julho</option><option value="8">Agosto</option>
+                        <option value="9">Setembro</option><option value="10">Outubro</option>
+                        <option value="11">Novembro</option><option value="12">Dezembro</option>
+                    </select>
+                    <button id="aplicar-filtro" class="success">📊 Aplicar Filtros</button>
+                    <button id="limpar-filtros" class="secondary">🔄 Limpar</button>
+                </div>
+                
+                <div class="graficos">
+                    <div class="grafico-item">
+                        <h3>📊 Gastos por Tipo</h3>
+                        <canvas id="graficoPorTipo"></canvas>
+                    </div>
+                    <div class="grafico-item">
+                        <h3>🚗 Gastos por Veículo</h3>
+                        <canvas id="graficoPorVeiculo"></canvas>
+                    </div>
+                    <div class="grafico-item-full">
+                        <h3>🔢 Gastos por Placa</h3>
+                        <canvas id="graficoPorPlaca"></canvas>
+                    </div>
+                    <div class="grafico-item">
+                        <h3>👤 Diárias por Motorista</h3>
+                        <canvas id="graficoDiariaMotorista"></canvas>
+                    </div>
+                    <div class="grafico-item">
+                        <h3>📈 Evolução Mensal</h3>
+                        <canvas id="graficoMensal"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
